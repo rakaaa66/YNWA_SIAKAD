@@ -1,0 +1,95 @@
+// Skema Database SIAKAD - Kelompok YNWA
+
+Table Program_Studi {
+  id_prodi int [primary key, increment]
+  kode_prodi varchar(10) [unique, not null]
+  nama_prodi varchar(100) [not null]
+}
+
+Table Admin_Akademik {
+  id_admin int [primary key, increment]
+  username varchar(50) [not null]
+  password varchar(255) [not null]
+  nama_lengkap varchar(100) [not null]
+}
+
+Table Dosen {
+  nip_nidn varchar(18) [primary key]
+  nama_lengkap varchar(100) [not null]
+  email varchar(100) [unique, not null]
+  password varchar(255) [not null]
+  no_hp varchar(15) [not null]
+  id_prodi int
+}
+
+Table Mahasiswa {
+  nim varchar(15) [primary key]
+  nama_lengkap varchar(100) [not null]
+  email varchar(100) [unique, not null]
+  password varchar(255) [not null]
+  no_hp varchar(15) [null]
+  alamat text [null]
+  status_pembayaran varchar [default: 'Belum', note: "ENUM('Lunas', 'Belum')"]
+  id_prodi int
+  nip_dpa varchar(18)
+}
+
+Table Mata_Kuliah {
+  kode_mk varchar(10) [primary key]
+  nama_mk varchar(100) [not null]
+  sks int [not null]
+  semester_paket int [not null]
+  id_prodi int
+}
+
+Table Ruang_Kelas {
+  id_ruang int [primary key, increment]
+  nama_ruang varchar(20) [unique, not null]
+  kapasitas int [not null]
+}
+
+Table Jadwal_Perkuliahan {
+  id_jadwal int [primary key, increment]
+  kode_mk varchar(10)
+  nip_dosen varchar(18)
+  id_ruang int
+  tahun_akademik varchar(9) [not null]
+  semester_tipe varchar [not null, note: "ENUM('Ganjil', 'Genap')"]
+  hari varchar [not null, note: "ENUM('Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')"]
+  jam_mulai time [not null]
+  jam_selesai time [not null]
+}
+
+Table KRS {
+  id_krs int [primary key, increment]
+  nim varchar(15)
+  id_jadwal int
+  tahun_akademik varchar(9) [not null]
+  semester_tipe varchar [not null, note: "ENUM('Ganjil', 'Genap')"]
+  status_persetujuan varchar [default: 'Pending', note: "ENUM('Pending', 'Disetujui', 'Ditolak')"]
+  tgl_pengajuan datetime [not null]
+}
+
+Table Nilai {
+  id_nilai int [primary key, increment]
+  id_krs int
+  nilai_angka decimal(5,2) [null]
+  nilai_huruf varchar(2) [null]
+  bobot decimal(3,2) [null]
+  is_locked boolean [default: false]
+}
+
+// ==========================================
+// Relasi Antar Tabel (Foreign Keys)
+// ==========================================
+
+Ref: Mahasiswa.id_prodi > Program_Studi.id_prodi
+Ref: Mahasiswa.nip_dpa > Dosen.nip_nidn
+Ref: Dosen.id_prodi > Program_Studi.id_prodi
+Ref: Mata_Kuliah.id_prodi > Program_Studi.id_prodi
+Ref: Jadwal_Perkuliahan.kode_mk > Mata_Kuliah.kode_mk
+Ref: Jadwal_Perkuliahan.nip_dosen > Dosen.nip_nidn
+Ref: Jadwal_Perkuliahan.id_ruang > Ruang_Kelas.id_ruang
+Ref: KRS.nim > Mahasiswa.nim
+Ref: KRS.id_jadwal > Jadwal_Perkuliahan.id_jadwal
+Ref: Nilai.id_krs > KRS.id_krs
